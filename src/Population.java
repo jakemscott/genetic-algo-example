@@ -21,16 +21,17 @@ public class Population {
         Random rnd = new Random();
         StringBuilder word = new StringBuilder();
         for(int i = 0; i<Application.goal.length(); i++) {
-            word.append((char) (rnd.nextInt(26) + 'a'));
+            word.append(Application.alphabet.charAt(rnd.nextInt(Application.alphabet.length())));
         }
         return word.toString();
     }
 
     public ArrayList<String> createMatingPool(HashMap<String, Integer> fitness) {
+        //METHOD INCOMPLETE, Returned breeding buckets are not equal to initial population, only returning small prime population, should == 100
         HashMap<Float, ArrayList<String>> map = new HashMap<>();
         for (Map.Entry entry : fitness.entrySet()) {
             float value = ((Integer) entry.getValue() / (float) Application.goal.length()) * 100;
-            System.out.println("Value: " + value + " Fitness: " + entry.getValue());
+//            System.out.println("Word: " + entry.getKey() + " Value: " + value + " Fitness: " + entry.getValue());
             if (map.containsKey(value)) {
                 map.get(value).add((String) entry.getKey());
             } else {
@@ -40,25 +41,21 @@ public class Population {
         }
 
         float total_percentage = 0;
-        ArrayList<String> bucket = new ArrayList<>(100);
+        ArrayList<String> bucket = new ArrayList<>();
 
         for (Map.Entry entry : map.entrySet()) {
             //Add amount to find the remaining
-            System.out.println("Key: " + (float) entry.getKey());
             total_percentage += (float) entry.getKey();
-        }
-        System.out.println("Total: " + (100 - total_percentage));
-        float absent_percentage = 100 - total_percentage;
-
-        if (absent_percentage > total_percentage) {
-            for (Map.Entry entry : map.entrySet()) {
-                for (int i=0; i<((float) entry.getKey() / ((ArrayList<String>) entry.getValue()).size()); i++) {
-                    bucket.addAll((ArrayList<String>) entry.getValue());
+            int multiply = Math.round((float) entry.getKey() / ((ArrayList<String>) entry.getValue()).size());
+            for(String word : (ArrayList<String>) entry.getValue()) {
+                for (int i = 0; i<multiply; i++) {
+                    bucket.add(word);
                 }
             }
         }
+        float absent_percentage = 100 - bucket.size();
 
-        return new ArrayList<>();
+        return bucket;
     }
 
     public ArrayList<String> breed(ArrayList<String> matingPool) {
@@ -93,7 +90,7 @@ public class Population {
     }
 
     private String mutate(String word) {
-        return word.replace(word.charAt(new Random().nextInt(word.length())), (char) (new Random().nextInt(26) + 'a'));
+        return word.replace(word.charAt(new Random().nextInt(word.length())), Application.alphabet.charAt(new Random().nextInt(Application.alphabet.length())));
     }
 
     public HashMap<String, Integer> calcFitness() {
